@@ -1,0 +1,79 @@
+SELECT C.NAME AS CUSTOMER_NAME, P.NAME AS PRODUCT_NAME, P.PRICE, PR.QUANTITY, P.PRICE * PR.QUANTITY AS TOTLE, PR.CREATE_TIME , sum(P.PRICE * PR.QUANTITY) FROM CUSTOMERS AS C LEFT JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO LEFT JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID group by pr.create_time;
+-- SELECT C.NAME AS CUSTOMER_NAME, max(sum(P.PRICE * PR.QUANTITY)) as total, PR.CREATE_TIME
+--    FROM CUSTOMERS AS C LEFT JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO
+--    LEFT JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID
+--    group by MONTH(pr.create_time), c.name);
+
+
+
+
+-- select t2.customer_name, t2.mtotal, t2.create_time from
+--   (SELECT t.create_time, t.customer_name, MAX(t.total) as mtotal FROM
+--       (SELECT C.NAME AS CUSTOMER_NAME, sum(P.PRICE * PR.QUANTITY) as total, PR.CREATE_TIME
+--          FROM CUSTOMERS AS C
+--          LEFT JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO
+--          LEFT JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID
+--          group by MONTH(pr.create_time), c.name,YEAR(pr.create_time)
+--       ) as t
+--    group by month(create_time),year(create_time), t.CUSTOMER_NAME
+--    order by mtotal desc
+--   ) as t2
+-- group by month(create_time), year(create_time)
+-- order by create_time;
+
+
+
+-- SELECT T2.CUSTOMER_NO, T2.CUSTOMER_NAME, T2.MTOTAL AS AMOUNT, T2.CREATE_TIME FROM
+--   (SELECT T.CREATE_TIME, T.CUSTOMER_NAME, T.CUSTOMER_NO, MAX(T.TOTAL) AS MTOTAL FROM
+--       (SELECT C.NAME AS CUSTOMER_NAME, C.CUSTOMER_NO AS CUSTOMER_NO, SUM(P.PRICE * PR.QUANTITY) AS TOTAL, PR.CREATE_TIME
+--          FROM CUSTOMERS AS C
+--          INNER JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO
+--          INNER JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID
+--          GROUP BY MONTH(PR.CREATE_TIME), C.CUSTOMER_NO, YEAR(PR.CREATE_TIME)
+--       ) AS T
+--    GROUP BY MONTH(CREATE_TIME),YEAR(CREATE_TIME), T.CUSTOMER_NO
+--    ORDER BY MTOTAL DESC
+--   ) AS T2
+-- GROUP BY MONTH(CREATE_TIME), YEAR(CREATE_TIME)
+-- ORDER BY CREATE_TIME;
+
+
+SELECT T2.CUSTOMER_NO, T2.CUSTOMER_NAME, T2.MTOTAL AS AMOUNT, T2.CREATE_TIME FROM
+(SELECT T.CREATE_TIME, T.CUSTOMER_NAME, T.CUSTOMER_NO, MAX(T.TOTAL) AS MTOTAL FROM
+    (SELECT C.CUSTOMER_NO AS CUSTOMER_NO, C.NAME AS CUSTOMER_NAME, PR.CREATE_TIME, SUM(P.PRICE * PR.QUANTITY) AS TOTAL FROM PURCHASES AS PR
+      INNER JOIN PRODUCTS AS P ON PR.PRODUCT_ID = P.ID
+      INNER JOIN CUSTOMERS AS C ON C.CUSTOMER_NO = PR.CUSTOMER_ID
+      GROUP BY MONTH(PR.CREATE_TIME), YEAR(PR.CREATE_TIME), C.CUSTOMER_NO
+    ) AS T
+  GROUP BY MONTH(CREATE_TIME),YEAR(CREATE_TIME), T.CUSTOMER_NO
+)AS T2
+GROUP BY MONTH(CREATE_TIME), YEAR(CREATE_TIME)
+ORDER BY CREATE_TIME;
+
+
+-- SELECT t.create_time, t.customer_name, t.total FROM
+-- (SELECT C.NAME AS CUSTOMER_NAME, sum(P.PRICE * PR.QUANTITY) as total, PR.CREATE_TIME
+--    FROM CUSTOMERS AS C LEFT JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO
+--    LEFT JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID
+--    group by MONTH(pr.create_time), c.name) t
+-- inner join
+-- (
+--   select customer_name,
+--   max(total) total
+--   from t
+--   group by MONTH(create_time)
+-- ) t2
+-- on t.customer_name = t2.customer_name
+-- and t.total = t2.total;
+
+
+-- CREATE TEMPORARY TABLE IF NOT EXISTS tt AS (SELECT C.NAME AS CUSTOMER_NAME, sum(P.PRICE * PR.QUANTITY) as total, PR.CREATE_TIME
+--   FROM CUSTOMERS AS C LEFT JOIN PURCHASES AS PR ON PR.CUSTOMER_ID=C.CUSTOMER_NO
+--   LEFT JOIN PRODUCTS AS P ON P.ID = PR.PRODUCT_ID
+--   group by MONTH(pr.create_time), c.name );
+--
+-- SELECT create_time, customer_name FROM tt
+--   WHERE customer_name in (select customer_name, max(total)
+--                                 from tt
+--                                 group by create_time);
+
