@@ -1,1 +1,1 @@
-include 'jms', 'easymock', 'springvalidator', 'j2eeclass'
+include 'jms', 'easymock', 'springvalidator', 'j2eeclass', 'cleanCode'
